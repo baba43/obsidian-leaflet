@@ -9,6 +9,7 @@ node_modules
 main.js
 dist
 *.js.map
+*.LICENSE.txt
 .DS_Store
 *build.js
 rollup.config-dev.js
