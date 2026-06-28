@@ -372,10 +372,10 @@ export function getParamsFromSource(source: string): BlockParameters {
                                     .split(new RegExp(`(?:${type}):\\s?`))[1]
                                     ?.trim();
                                 const parsed = parseYaml(raw);
-                                // Colon-safe: enthaelt der Wert ": " (z.B. in einer
-                                // Marker-Beschreibung), macht parseYaml daraus ein
-                                // Objekt -> PapaParse crasht dann (readAsText) die
-                                // ganze Karte. Bei Nicht-String/Array -> Roh-String.
+                                // Colon-safe: if the value contains ": " (e.g. in
+                                // a marker description), parseYaml turns it into an
+                                // object -> PapaParse then crashes (readAsText) the
+                                // whole map. For non-string/array -> use raw string.
                                 return typeof parsed === "string" ||
                                     Array.isArray(parsed)
                                     ? parsed

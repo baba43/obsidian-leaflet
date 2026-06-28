@@ -19,8 +19,8 @@ import { LeafletSymbol } from "../utils/leaflet-import";
 import t from "src/l10n/locale";
 let L = window[LeafletSymbol];
 
-/** Einzelnes Emoji / Pictographic-Zeichen → wird als Text-Pin gerendert
- * (self-contained pro Marker, ohne vordefinierten Typ in der Config). */
+/** A single emoji / pictographic char -> rendered as a text pin
+ * (self-contained per marker, no predefined config type needed). */
 const EMOJI_RE = /\p{Extended_Pictographic}/u;
 
 abstract class MarkerTarget {
@@ -209,16 +209,13 @@ export class Marker extends Layer<DivIconMarker> {
         super();
 
         let icon: MarkerDivIcon;
-        // im äußeren Scope, da weiter unten (minZoom/maxZoom) genutzt;
-        // bei Emoji-Markern bleibt es undefined.
+        // outer scope: used further below (minZoom/maxZoom);
+        // stays undefined for emoji markers.
         let marker: MarkerIcon["markerIcon"] | undefined;
         if (type && EMOJI_RE.test(type) && !this.map.markerIcons.has(type)) {
-            // Emoji-Typ "<emoji> [bgFarbe]" -> Text-Pin mit optional farbigem
-            // Hintergrund-Kreis. Self-contained pro Marker, kein Config-Typ.
-            // Syntax: "<emoji> [farbe] [square|nobg]" (Reihenfolge egal).
-            // Farbe wird zu ~40% mit Weiss gemischt -> einheitlich dezent,
-            // Emoji bleibt lesbar. Marker nennt die echte Farbe (z.B. "red"),
-            // das Plugin garantiert die "Leichtigkeit".
+            // Emoji type: "<emoji> [color] [square|nobg]" (order-independent)
+            // -> self-contained text pin, no predefined config type needed.
+            // color = colored border (see below), shape via square/nobg.
             const tokens = type.split(/\s+/);
             const emoji = tokens.shift();
             let bg = "";
@@ -227,11 +224,11 @@ export class Marker extends Layer<DivIconMarker> {
                 if (tk === "square") classes.push("leaflet-emoji-square");
                 else if (tk === "nobg") classes.push("leaflet-emoji-nobg");
                 else if (tk === "round" || tk === "circle") {
-                    /* default = rund */
+                    /* default = round */
                 } else if (!bg) bg = tk;
             }
-            // Farbe = 2px-Rahmen (Hintergrund bleibt weiss -> Emoji gut lesbar,
-            // Highlights "poppen" durch den farbigen Ring).
+            // color = border (background stays white so the emoji stays
+            // readable; highlights pop via the colored ring).
             const style = bg ? ` style="border:3px solid ${bg}"` : "";
             icon = markerDivIcon({
                 html: `<div class="${classes.join(
@@ -302,8 +299,8 @@ export class Marker extends Layer<DivIconMarker> {
     get group() {
         const layer = this.mapLayer;
         if (layer && !layer.markers[this.type]) {
-            // Gruppe fuer dynamische (z.B. Emoji-)Typen lazy anlegen und an die
-            // Karten-Gruppe haengen, sonst wird der Marker nie angezeigt.
+            // lazily create a layer group for dynamic (e.g. emoji) types and
+            // attach it to the map group, otherwise the marker is never shown.
             layer.markers[this.type] = L.layerGroup();
             layer.markers[this.type].addTo(layer.group);
         }

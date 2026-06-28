@@ -1,10 +1,10 @@
-/* === Custom-Erweiterung (Fork): Emoji-Marker ===
- * Hält unsere Änderungen aus dem Upstream-main.css heraus -> saubere Rebases.
- * Feature: ein Emoji als Marker-"type" ("<emoji> [farbe] [square|nobg]").
- * Farbe = 2-3px Rahmen, Hintergrund bleibt weiss; Form via square/nobg.
+/* === Custom extension (fork): emoji markers ===
+ * Keeps our changes out of upstream main.css -> clean rebases.
+ * Feature: an emoji as marker "type" ("<emoji> [color] [square|nobg]").
+ * color = 2-3px border, background stays white; shape via square/nobg.
  */
 
-/* Emoji als Text-Pin. Nutzt dieselbe 25px-Box + Bottom-Anchor wie FA-Marker. */
+/* Emoji as a text pin. Same 25px box + bottom anchor as the FA markers. */
 .block-language-leaflet .leaflet-emoji-icon {
     display: flex !important;
     align-items: center;
@@ -12,8 +12,8 @@
     background: transparent !important;
     box-shadow: none;
 }
-/* Der Kreis sitzt auf dem inneren Element, damit der per-Marker Inline-Stil
- * (border via style="…") greift. */
+/* The circle lives on the inner element so the per-marker inline style
+ * (border via style="…") takes effect. */
 .block-language-leaflet .leaflet-emoji-icon .leaflet-emoji {
     display: flex;
     align-items: center;
@@ -27,7 +27,7 @@
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
-/* Form-Varianten (zweiter Kanal): eckig bzw. ganz ohne Hintergrund. */
+/* Shape variants (second channel): square, or no background at all. */
 .block-language-leaflet .leaflet-emoji-icon .leaflet-emoji.leaflet-emoji-square {
     border-radius: 5px;
 }

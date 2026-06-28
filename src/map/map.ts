@@ -389,9 +389,9 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
             if (!this.displaying.has(type)) {
                 this.displaying.set(type, true);
             }
-            /* Dynamische (z.B. Emoji-)Typen haben keine vordefinierte Layer-
-             * Gruppe. Ohne Gruppe wird der Marker nie angezeigt -> on-demand
-             * anlegen und an die Karten-Gruppe haengen. */
+            /* Dynamic (e.g. emoji) types have no predefined layer group.
+             * Without a group the marker is never shown -> create one on
+             * demand and attach it to the map group. */
             if (this.currentGroup && !this.currentGroup.markers[type]) {
                 this.currentGroup.markers[type] = L.layerGroup();
                 this.currentGroup.markers[type].addTo(this.currentGroup.group);
