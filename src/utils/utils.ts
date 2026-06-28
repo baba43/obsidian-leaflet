@@ -367,15 +367,20 @@ export function getParamsFromSource(source: string): BlockParameters {
                     default: {
                         if ((source.match(r) || []).length > 1) {
                             //defined separately
-                            obj[type] = (source.match(r) || []).map((p) =>
-                                parseYaml(
-                                    p
-                                        .split(
-                                            new RegExp(`(?:${type}):\\s?`)
-                                        )[1]
-                                        ?.trim()
-                                )
-                            );
+                            obj[type] = (source.match(r) || []).map((p) => {
+                                const raw = p
+                                    .split(new RegExp(`(?:${type}):\\s?`))[1]
+                                    ?.trim();
+                                const parsed = parseYaml(raw);
+                                // Colon-safe: enthaelt der Wert ": " (z.B. in einer
+                                // Marker-Beschreibung), macht parseYaml daraus ein
+                                // Objekt -> PapaParse crasht dann (readAsText) die
+                                // ganze Karte. Bei Nicht-String/Array -> Roh-String.
+                                return typeof parsed === "string" ||
+                                    Array.isArray(parsed)
+                                    ? parsed
+                                    : raw;
+                            });
                         } else if (params[type] instanceof Array) {
                             obj[type] = params[type];
                         } else if (params[type] !== undefined) {
