@@ -368,7 +368,10 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
                     color: marker.type.color
                 });
             } else {
-                if (!this.markerTypes.includes(marker.type)) {
+                if (
+                    !this.markerTypes.includes(marker.type) &&
+                    !/\p{Extended_Pictographic}/u.test(marker.type ?? "")
+                ) {
                     new Notice(
                         t(
                             `Marker type "%1" does not exist, using default.`,
@@ -385,6 +388,13 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
 
             if (!this.displaying.has(type)) {
                 this.displaying.set(type, true);
+            }
+            /* Dynamische (z.B. Emoji-)Typen haben keine vordefinierte Layer-
+             * Gruppe. Ohne Gruppe wird der Marker nie angezeigt -> on-demand
+             * anlegen und an die Karten-Gruppe haengen. */
+            if (this.currentGroup && !this.currentGroup.markers[type]) {
+                this.currentGroup.markers[type] = L.layerGroup();
+                this.currentGroup.markers[type].addTo(this.currentGroup.group);
             }
             const newMarker = new Marker(this, {
                 id: marker.id,
@@ -1337,7 +1347,12 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
         });
         /** Remove Old Marker Types From Filter List */
         [...this.displaying].forEach(([type]) => {
-            if (this.markerTypes.includes(type) || type == "custom") return;
+            if (
+                this.markerTypes.includes(type) ||
+                type == "custom" ||
+                /\p{Extended_Pictographic}/u.test(type)
+            )
+                return;
 
             this.displaying.delete(type);
 
