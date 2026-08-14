@@ -21,7 +21,9 @@ let L = window[LeafletSymbol];
 
 /** A single emoji / pictographic char -> rendered as a text pin
  * (self-contained per marker, no predefined config type needed). */
-const EMOJI_RE = /\p{Extended_Pictographic}/u;
+// U+20E3 = Combining Enclosing Keycap: keycap emoji such as 1️⃣ are built from
+// an ASCII digit + VS16 + keycap and are not Extended_Pictographic themselves.
+export const EMOJI_RE = /\p{Extended_Pictographic}|⃣/u;
 
 abstract class MarkerTarget {
     abstract text: string;
@@ -219,21 +221,30 @@ export class Marker extends Layer<DivIconMarker> {
             const tokens = type.split(/\s+/);
             const emoji = tokens.shift();
             let bg = "";
+            let badge = "";
             const classes = ["leaflet-emoji"];
             for (const tk of tokens) {
+                const badgeMatch = tk.match(/^n(\d{1,2})$/);
                 if (tk === "square") classes.push("leaflet-emoji-square");
                 else if (tk === "nobg") classes.push("leaflet-emoji-nobg");
                 else if (tk === "round" || tk === "circle") {
                     /* default = round */
+                } else if (badgeMatch) {
+                    // number badge: "n<1-2 digits>" -> small counter top-right.
+                    // Regex group is digits-only, safe to inline into HTML.
+                    badge = badgeMatch[1];
                 } else if (!bg) bg = tk;
             }
             // color = border (background stays white so the emoji stays
             // readable; highlights pop via the colored ring).
             const style = bg ? ` style="border:3px solid ${bg}"` : "";
+            const badgeHtml = badge
+                ? `<span class="leaflet-emoji-badge">${badge}</span>`
+                : "";
             icon = markerDivIcon({
                 html: `<div class="${classes.join(
                     " "
-                )}"${style}>${emoji}</div>`,
+                )}"${style}>${emoji}${badgeHtml}</div>`,
                 className: "leaflet-div-icon leaflet-emoji-icon"
             });
         } else {

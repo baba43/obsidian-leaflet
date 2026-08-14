@@ -18,7 +18,7 @@ import {
     DistanceDisplay
 } from "../../types";
 
-import { GPX, Marker, GeoJSON, Overlay } from "src/layer";
+import { GPX, Marker, GeoJSON, Overlay, EMOJI_RE } from "src/layer";
 
 import { OverlayContextModal } from "src/modals/context";
 
@@ -370,7 +370,7 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
             } else {
                 if (
                     !this.markerTypes.includes(marker.type) &&
-                    !/\p{Extended_Pictographic}/u.test(marker.type ?? "")
+                    !EMOJI_RE.test(marker.type ?? "")
                 ) {
                     new Notice(
                         t(
@@ -1350,7 +1350,7 @@ export abstract class BaseMap extends Events implements BaseMapDefinition {
             if (
                 this.markerTypes.includes(type) ||
                 type == "custom" ||
-                /\p{Extended_Pictographic}/u.test(type)
+                EMOJI_RE.test(type)
             )
                 return;
 
