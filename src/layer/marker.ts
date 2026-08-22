@@ -224,15 +224,20 @@ export class Marker extends Layer<DivIconMarker> {
             let badge = "";
             const classes = ["leaflet-emoji"];
             for (const tk of tokens) {
-                const badgeMatch = tk.match(/^n(\d{1,2})$/);
+                // "n<1-2 digits>" (e.g. n7) or "n:<1-4 alphanumerics>" (e.g. n:A1).
+                // The colon branch is required for text badges so that CSS
+                // colour names starting with "n" (navy) still parse as colours.
+                const badgeMatch = tk.match(
+                    /^n(?:(\d{1,2})|:([A-Za-z0-9]{1,4}))$/
+                );
                 if (tk === "square") classes.push("leaflet-emoji-square");
                 else if (tk === "nobg") classes.push("leaflet-emoji-nobg");
                 else if (tk === "round" || tk === "circle") {
                     /* default = round */
                 } else if (badgeMatch) {
-                    // number badge: "n<1-2 digits>" -> small counter top-right.
-                    // Regex group is digits-only, safe to inline into HTML.
-                    badge = badgeMatch[1];
+                    // small badge, top-right. Both regex groups are restricted
+                    // to [A-Za-z0-9], so they are safe to inline into HTML.
+                    badge = badgeMatch[1] ?? badgeMatch[2];
                 } else if (!bg) bg = tk;
             }
             // color = border (background stays white so the emoji stays
