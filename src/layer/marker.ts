@@ -25,6 +25,16 @@ let L = window[LeafletSymbol];
 // an ASCII digit + VS16 + keycap and are not Extended_Pictographic themselves.
 export const EMOJI_RE = /\p{Extended_Pictographic}|⃣/u;
 
+/** Badge text goes straight into the icon's HTML, so escape it there. */
+function escapeBadge(value: string): string {
+    return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 abstract class MarkerTarget {
     abstract text: string;
     abstract display: HTMLElement;
@@ -224,20 +234,22 @@ export class Marker extends Layer<DivIconMarker> {
             let badge = "";
             const classes = ["leaflet-emoji"];
             for (const tk of tokens) {
-                // "n<1-2 digits>" (e.g. n7) or "n:<1-4 alphanumerics>" (e.g. n:A1).
-                // The colon branch is required for text badges so that CSS
-                // colour names starting with "n" (navy) still parse as colours.
-                const badgeMatch = tk.match(
-                    /^n(?:(\d{1,2})|:([A-Za-z0-9]{1,4}))$/
-                );
+                // "n<1-2 digits>" (e.g. n7) or "n:<anything>" (e.g. n:A1,
+                // n:1.1, n:B-3). The colon branch takes arbitrary text so the
+                // badge can carry whatever labelling scheme a note needs; it
+                // is HTML-escaped below. The colon is required so that CSS
+                // colour names starting with "n" (navy) still parse as
+                // colours. Spaces are impossible either way, because tokens
+                // are split on whitespace.
+                const badgeMatch = tk.match(/^n(?:(\d{1,2})|:(\S+))$/);
                 if (tk === "square") classes.push("leaflet-emoji-square");
                 else if (tk === "nobg") classes.push("leaflet-emoji-nobg");
                 else if (tk === "round" || tk === "circle") {
                     /* default = round */
                 } else if (badgeMatch) {
-                    // small badge, top-right. Both regex groups are restricted
-                    // to [A-Za-z0-9], so they are safe to inline into HTML.
-                    badge = badgeMatch[1] ?? badgeMatch[2];
+                    // small badge, top-right. Escaped before it reaches the
+                    // icon HTML, so free-form text is safe here.
+                    badge = escapeBadge(badgeMatch[1] ?? badgeMatch[2]);
                 } else if (!bg) bg = tk;
             }
             // color = border (background stays white so the emoji stays
