@@ -239,8 +239,9 @@ export class Marker extends Layer<DivIconMarker> {
                 // badge can carry whatever labelling scheme a note needs; it
                 // is HTML-escaped below. The colon is required so that CSS
                 // colour names starting with "n" (navy) still parse as
-                // colours. Spaces are impossible either way, because tokens
-                // are split on whitespace.
+                // colours. A literal space cannot appear in a token (they are
+                // split on whitespace), so "_" stands in for one: "n:2.2_J"
+                // renders as "2.2 J".
                 const badgeMatch = tk.match(/^n(?:(\d{1,2})|:(\S+))$/);
                 if (tk === "square") classes.push("leaflet-emoji-square");
                 else if (tk === "nobg") classes.push("leaflet-emoji-nobg");
@@ -249,7 +250,9 @@ export class Marker extends Layer<DivIconMarker> {
                 } else if (badgeMatch) {
                     // small badge, top-right. Escaped before it reaches the
                     // icon HTML, so free-form text is safe here.
-                    badge = escapeBadge(badgeMatch[1] ?? badgeMatch[2]);
+                    badge = escapeBadge(
+                        (badgeMatch[1] ?? badgeMatch[2]).replace(/_/g, " ")
+                    );
                 } else if (!bg) bg = tk;
             }
             // color = border (background stays white so the emoji stays
